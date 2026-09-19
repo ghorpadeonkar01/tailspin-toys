@@ -7,6 +7,13 @@ applyTo: '**/*.astro'
 
 ## Astro Component Patterns
 
+### Component Contracts and Comments
+
+- Every reusable component must define a `Props` interface in frontmatter and add a short TSDoc comment describing the component's public contract.
+- Document individual props when their purpose, accepted values, or default is not obvious. Keep the documentation next to the interface or prop declaration.
+- Use comments to explain intent, accessibility decisions, or non-obvious constraints. Do not add comments that simply narrate markup or repeat a class name.
+- Treat stale comments as bugs: update or remove them whenever the related component changes.
+
 Astro handles everything in the UI: pages, layouts, components, routing, and content. The site is **fully prerendered** (`output: 'static'`) — there is no client-side UI framework and no separate API server. Pages read data **directly in frontmatter** at build time via the Drizzle/Node SQLite data-access helpers in `src/lib/`.
 
 ### Component Structure
