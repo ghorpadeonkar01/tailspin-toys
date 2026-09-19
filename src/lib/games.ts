@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, like } from 'drizzle-orm';
 import type { Database } from './db';
 import { games, categories, publishers } from '../../db/schema';
 import type { Category, Game, Publisher } from '../types/game';
@@ -6,6 +6,7 @@ import type { Category, Game, Publisher } from '../types/game';
 export interface GameFilters {
     categoryIds?: number[];
     publisherId?: number;
+    title?: string;
 }
 
 /**
@@ -100,6 +101,10 @@ export async function getFilteredGames(
 
     if (filters.publisherId !== undefined) {
         conditions.push(eq(games.publisherId, filters.publisherId));
+    }
+
+    if (filters.title?.trim()) {
+        conditions.push(like(games.title, `%${filters.title.trim()}%`));
     }
 
     const query = baseGamesQuery(db);

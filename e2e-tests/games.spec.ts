@@ -58,6 +58,25 @@ test.describe('Game Listing and Navigation', () => {
     await expect(page.getByTestId('games-count')).toHaveText('Showing 8 games');
   });
 
+  test('should filter games by title search and show an empty state', async ({ page }) => {
+    await page.goto('/');
+    const visibleCards = page.locator('[data-testid="game-card"]:visible');
+    const search = page.getByTestId('game-search');
+
+    await test.step('Search case-insensitively by game title', async () => {
+      await search.fill('devops');
+      await expect(visibleCards).toHaveCount(1);
+      await expect(visibleCards.getByTestId('game-title')).toHaveText(['DevOps Dominion']);
+      await expect(page.getByTestId('games-count')).toHaveText('Showing 1 game');
+    });
+
+    await test.step('Show an empty state when no title matches', async () => {
+      await search.fill('does not exist');
+      await expect(visibleCards).toHaveCount(0);
+      await expect(page.getByTestId('filtered-empty-state')).toContainText('No games match');
+    });
+  });
+
   test('should navigate to correct game details page when clicking on a game', async ({ page }) => {
     let gameId: string | null;
     let gameTitle: string | null;
