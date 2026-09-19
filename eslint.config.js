@@ -33,11 +33,20 @@ export default [
   // Astro files
   ...eslintPluginAstro.configs.recommended,
 
-  // TypeScript-specific overrides
+  // TypeScript formatting and parser settings
   {
-    files: ["**/*.ts"],
+    files: ["**/*.{ts,tsx}"],
     languageOptions: {
       parser: tseslint.parser,
+    },
+    rules: {
+      // Keep TypeScript formatting consistent without requiring a separate formatter.
+      "array-bracket-spacing": ["error", "never"],
+      "comma-dangle": ["error", "always-multiline"],
+      "eol-last": ["error", "always"],
+      "object-curly-spacing": ["error", "always"],
+      quotes: ["error", "single", { avoidEscape: true }],
+      semi: ["error", "always"],
     },
   },
 ];
