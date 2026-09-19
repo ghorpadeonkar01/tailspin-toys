@@ -33,6 +33,17 @@ const [games, categories, publishers] = await Promise.all([
         </div>
         {games.length > 0 && (
           <form class="grid gap-4 rounded-xl border border-slate-700 bg-slate-800/60 p-4 sm:grid-cols-2" data-testid="game-filters">
+            <div class="sm:col-span-2">
+              <label for="game-search" class="mb-2 block text-sm font-medium text-slate-200">Search games by title</label>
+              <input
+                id="game-search"
+                type="search"
+                name="search"
+                placeholder="e.g. DevOps Dominion"
+                data-testid="game-search"
+                class="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+            </div>
             <fieldset>
               <legend class="mb-2 text-sm font-medium text-slate-200">Categories</legend>
               <div class="flex flex-wrap gap-3">
@@ -81,7 +92,7 @@ const [games, categories, publishers] = await Promise.all([
             {games.map((game) => <GameCard game={game} />)}
           </div>
           <div class="hidden" data-testid="filtered-empty-state">
-            <EmptyState text="No games match the selected filters." />
+            <EmptyState text="No games match the selected filters or search." />
           </div>
         </>
       )}
@@ -96,18 +107,22 @@ const [games, categories, publishers] = await Promise.all([
   const emptyState = document.querySelector<HTMLElement>('[data-testid="filtered-empty-state"]');
   const gamesCount = document.querySelector<HTMLElement>('[data-testid="games-count"]');
 
-  filterForm?.addEventListener('change', () => {
+  const applyFilters = () => {
+    if (!filterForm) return;
+
     const selectedCategories = new Set(
       Array.from(filterForm.querySelectorAll<HTMLInputElement>('input[name="category"]:checked'))
         .map((input) => input.value),
     );
     const selectedPublisher = filterForm.querySelector<HTMLSelectElement>('select[name="publisher"]')?.value ?? '';
+    const searchTerm = filterForm.querySelector<HTMLInputElement>('input[name="search"]')?.value.trim().toLocaleLowerCase() ?? '';
     let visibleCount = 0;
 
     gameCards.forEach((card) => {
       const categoryMatches = selectedCategories.size === 0 || selectedCategories.has(card.dataset.categoryId ?? '');
       const publisherMatches = selectedPublisher === '' || selectedPublisher === card.dataset.publisherId;
-      const visible = categoryMatches && publisherMatches;
+      const titleMatches = searchTerm === '' || (card.dataset.gameTitle ?? '').toLocaleLowerCase().includes(searchTerm);
+      const visible = categoryMatches && publisherMatches && titleMatches;
       card.classList.toggle('hidden', !visible);
       visibleCount += visible ? 1 : 0;
     });
@@ -117,9 +132,12 @@ const [games, categories, publishers] = await Promise.all([
     if (gamesCount) {
       gamesCount.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? 'game' : 'games'}`;
     }
-  });
+  };
+
+  filterForm?.addEventListener('input', applyFilters);
+  filterForm?.addEventListener('change', applyFilters);
 
   filterForm?.addEventListener('reset', () => {
-    requestAnimationFrame(() => filterForm.dispatchEvent(new Event('change')));
+    requestAnimationFrame(applyFilters);
   });
 </script>

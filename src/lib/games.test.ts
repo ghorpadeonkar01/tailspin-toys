@@ -99,6 +99,22 @@ describe('games data-access helpers', () => {
         expect(filtered.map((game) => game.title)).toEqual(['Other Publisher Game']);
     });
 
+    it('filters by a case-insensitive title search', async () => {
+        await seedGames(db, 3);
+
+        const filtered = await getFilteredGames(db, { title: 'game 02' });
+
+        expect(filtered.map((game) => game.title)).toEqual(['Game 02']);
+    });
+
+    it('ignores an empty title search', async () => {
+        await seedGames(db, 2);
+
+        const filtered = await getFilteredGames(db, { title: '  ' });
+
+        expect(filtered).toHaveLength(2);
+    });
+
     it('fetches a single game by id', async () => {
         await seedGames(db, 2);
         const ids = await getAllGameIds(db);
